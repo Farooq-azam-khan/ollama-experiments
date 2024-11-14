@@ -65,6 +65,6 @@ if __name__ == "__main__":
     # 1. How does the book start? 
     # 2. who is the main character?
     # 3. List the characters here.
-    # 4. What is the setting throughout the chapter?
+    # 4. What is the setting throughout the chapter? / where is this novel set?
     question = input(">> ")
-    asyncio.run(chat(question=question, context=organized_book[1][1]))
+    asyncio.run(chat(question=question, context=organized_book[1][1][:100]))
