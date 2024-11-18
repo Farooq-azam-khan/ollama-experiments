@@ -3,28 +3,37 @@ import asyncio
 
 
 async def chat():
+    model_name = "llama3.2:1b-instruct-fp16"
+    python_tag = "<|python_tag|>"
     run_python = False
+    chat_history = [
+        {
+            "role": "system",
+            "content": "Environment: ipython\nTools: brave_search",
+        },
+        {
+            "role": "user",
+            "content": "Can you search up the top news articles on hacker news and the new york times. Compare them as well.",
+        },
+    ]
+
+    response = ollama.chat(model=model_name, messages=chat_history)
+    chat_history.append(
+        {"role": "assistant", "content": response["message"]["content"]}
+    )
+    chat_history.append(
+        {
+            "role": "tool",
+            "content": "1. (nytimes.com) Np/=P solved. Nobel prize immanent.\n\n2. (news.ycombinator.com) all of physics has been solve. who knew it was so easy",
+        }
+    )
+    print(chat_history)
     async for token in await ollama.AsyncClient().chat(
-        model="llama3.2:1b-instruct-fp16",
-        messages=[
-            {
-                "role": "system",
-                "content": "Environment: ipython\nTools: brave_search",
-            },
-            {"role": "user", "content": "Can you search up the top news articles on hacker news and the new york times. Compare them as well."},
-        ],
-        stream=True,
+        model=model_name, messages=chat_history, stream=True, tools=[]
     ):
-        if token["message"]["content"] == "<|python_tag|>":
-            run_python = True
-            print("---> execute <---")
-        else:
-            print(token["message"]["content"], end="", flush=True)
-        if token["done"]:
-            print()
-            print("total duration:", token["total_duration"] // 1000)
-            if run_python:
-                print("-----------")
+        token_str = token["message"]["content"]
+        print(token_str, end="", flush=True)
 
 
-asyncio.run(chat())
+if __name__ == "__main__":
+    asyncio.run(chat())
